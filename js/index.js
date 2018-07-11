@@ -1,4 +1,4 @@
-const WINDOWDIMENSION = 1000
+const WINDOWDIMENSION = 800
 const BLOCKHOLDERDIMENSION = 400
 const GAMEDIMENSION = WINDOWDIMENSION - BLOCKHOLDERDIMENSION
 const GRIDBLOCKSIZE = 10
@@ -18,8 +18,12 @@ var game = new Phaser.Game(GAMEDIMENSION, WINDOWDIMENSION, Phaser.AUTO, 'contain
 
 //Globals
 let shape; //current shape your using
-let shapeArray; //array of all rendered shapes
+let spriteGroup; //array of all rendered shapes
 let grid; //grid on board
+let pendingShapes;
+//the currently held down sprite
+let activeSprite;
+let score;
 
 //Called first
 function preload() {
@@ -42,17 +46,107 @@ function create() {
   //generate row of grid blocks
   drawGrid(yGrid)
 
-  //begin block generation
+  //init block array
+  spriteGroup = game.add.group();
+
+  //current shape choices
+  pendingShapes = game.add.group();
+
   blockGenerator();
 
   // Set up handlers for mouse events
-  // game.input.onDown.add(mouseDragStart, this);
+  game.input.onDown.add(mouseDragStart, this);
+  game.input.onUp.add(mouseDragEnd, this);
 
 }
 
 //Continuously called last
 function update() {
 
+}
+
+function mouseDragEnd(activeSprite) {
+  activeSprite = selectedSprite(pendingShapes)
+
+  if(activeSprite) {
+    if(selectedSpriteInBounds(activeSprite) && clashFree()) {
+
+      //add active sprite to sprite group when its officially put down
+      spriteGroup.add(activeSprite)
+
+      //promise to snap the block in first, then we disable the drag
+      let disableBlockDrag = new Promise(function(resolve, reject) {
+        let blockSnap = activeSprite.input.enableSnap(BLOCKSIZE, BLOCKSIZE, false, true)
+        resolve(blockSnap)
+      })
+      disableBlockDrag.then(function() {
+        activeSprite.inputEnabled = false
+        activeSprite.input.disableDrag()
+
+        //check to see if the line needs to be destoryed
+        lineInspector()
+        //if you are out of shapes down in the minibox, generate more
+        if(pendingShapes.children.length === 0) {
+          blockGenerator();
+        }
+      })
+    } else {
+      resetSpritePosition(activeSprite)
+    }
+  }
+}
+
+function clashFree() {
+
+  //variable to be returned shows if theres a collision or not
+  let noCollision = true
+  //if sprite group is empty, we dont care about collisions
+  if(spriteGroup.length > 0) {
+    //check the current sprite you are holding to see if its x and y values match up with an existing one on the board
+    activeSprite.children.forEach(sprite => {
+      let activeX = Math.round(sprite.worldPosition.x/BLOCKSIZE)*BLOCKSIZE;
+      let activeY = Math.round(sprite.worldPosition.y/BLOCKSIZE)*BLOCKSIZE;
+      spriteGroup.children.forEach(placedSprite => {
+        placedSprite.children.forEach(spriteGraphic => {
+          if(spriteGraphic.worldPosition.x === activeX && spriteGraphic.worldPosition.y === activeY) {
+            noCollision = false
+          }
+        })
+      })
+    })
+  }
+  return noCollision
+}
+
+function mouseDragStart() {
+  activeSprite = selectedSprite(pendingShapes)
+}
+
+function selectedSprite(pendingShapes) {
+  let selectedChild
+  pendingShapes.forEach(child => {
+    if(child.input.pointerOver()) {
+      selectedChild = child
+    }
+  })
+  return selectedChild
+}
+
+
+function selectedSpriteInBounds(activeSprite) {
+  let inBounds = true
+  activeSprite.children.forEach(child=>{
+    //check to see if child is out of bounds. We are checking the center of each block in a sprite
+    if(child.worldPosition.x+(BLOCKSIZE/2) > GAMEDIMENSION || child.worldPosition.y+(BLOCKSIZE/2) > GAMEDIMENSION || child.worldPosition.x+(BLOCKSIZE/2) < 0 || child.worldPosition.y+(BLOCKSIZE/2) < 0) {
+      inBounds = false
+    }
+  })
+  return inBounds
+}
+
+function resetSpritePosition(activeSprite) {
+  activeSprite.position.x = activeSprite.cameraOffset.x
+  activeSprite.position.y = activeSprite.cameraOffset.y
 }
 
 //function called at create, creates the game grid
@@ -81,7 +175,6 @@ function getRandomShapeColor() {
       result = u;
     }
   }
-  console.log(SHAPECOLORS.colors[result])
   return SHAPECOLORS.colors[result];
 }
 
@@ -96,7 +189,7 @@ function drawShapes(randInt) {
     //five vertical squares
     case 0:
       //draw five vertical squares shape
-      return function fiveVerticalSquares(randomColor) {
+      return function fiveVerticalSquares(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(0, BLOCKSIZE);
         let blockShape3 = game.add.graphics(0, BLOCKSIZE*2);
@@ -127,7 +220,7 @@ function drawShapes(randInt) {
         blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
         //create the sprite that will be located at x,y
-        shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
         //add children to the sprite
         shapeSprite.addChild(blockShape)
@@ -135,13 +228,15 @@ function drawShapes(randInt) {
         shapeSprite.addChild(blockShape3)
         shapeSprite.addChild(blockShape4)
         shapeSprite.addChild(blockShape5)
+
+        return shapeSprite
       }
     break;
 
     //three adj squares
     case 1:
       //draw the three adjacent squares shape
-      return function threeAdjacentSquares(randomColor) {
+      return function threeAdjacentSquares(randomColor, coordinates) {
         let blockShape = this.game.add.graphics(0,0);
         let blockShape2 = this.game.add.graphics(BLOCKSIZE,0);
         let blockShape3 = this.game.add.graphics(BLOCKSIZE*2, 0);
@@ -162,19 +257,21 @@ function drawShapes(randInt) {
         blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
         //create the sprite that will be located at x,y
-        shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
         //add children to the sprite
         shapeSprite.addChild(blockShape)
         shapeSprite.addChild(blockShape2)
         shapeSprite.addChild(blockShape3)
+
+        return shapeSprite
       }
     break;
 
     // 7 shape
     case 2:
       //draw mirrorred L shape
-      return function lShapeMirrored(randomColor) {
+      return function lShapeMirrored(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(BLOCKSIZE, 0);
         let blockShape3 = game.add.graphics(BLOCKSIZE*2, 0);
@@ -205,7 +302,7 @@ function drawShapes(randInt) {
         blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
         //create the sprite that will be located at x,y
-        shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
         //add children to the sprite
         shapeSprite.addChild(blockShape)
@@ -213,11 +310,13 @@ function drawShapes(randInt) {
         shapeSprite.addChild(blockShape3)
         shapeSprite.addChild(blockShape4)
         shapeSprite.addChild(blockShape5)
+
+        return shapeSprite
       }
 
     //generate square shape
     case 3:
-      return function squareShape(randomColor) {
+      return function squareShape(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(BLOCKSIZE, 0);
         let blockShape3 = game.add.graphics(0, BLOCKSIZE);
@@ -243,18 +342,20 @@ function drawShapes(randInt) {
         blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
         //create the sprite that will be located at x,y
-        shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
         //add children to the sprite
         shapeSprite.addChild(blockShape)
         shapeSprite.addChild(blockShape2)
         shapeSprite.addChild(blockShape3)
         shapeSprite.addChild(blockShape4)
+
+        return shapeSprite
       }
 
     //generate small mirrored L
     case 4:
-      return function lShapeSmallMirrored(randomColor) {
+      return function lShapeSmallMirrored(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(BLOCKSIZE, 0);
         let blockShape3 = game.add.graphics(BLOCKSIZE, BLOCKSIZE);
@@ -275,18 +376,20 @@ function drawShapes(randInt) {
         blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
         //create the sprite that will be located at x,y
-        shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
         //add children to the sprite
         shapeSprite.addChild(blockShape)
         shapeSprite.addChild(blockShape2)
         shapeSprite.addChild(blockShape3)
+
+        return shapeSprite
       }
     break;
 
     //generate small L
     case 5:
-      return function lShapeSmall(randomColor) {
+      return function lShapeSmall(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(0, BLOCKSIZE);
         let blockShape3 = game.add.graphics(BLOCKSIZE, BLOCKSIZE);
@@ -307,17 +410,19 @@ function drawShapes(randInt) {
         blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
         //create the sprite that will be located at x,y
-        shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
         //add children to the sprite
         shapeSprite.addChild(blockShape)
         shapeSprite.addChild(blockShape2)
         shapeSprite.addChild(blockShape3)
+
+        return shapeSprite
       }
   break;
 
   case 6:
-    return function singleSquare(randomColor) {
+    return function singleSquare(randomColor, coordinates) {
       let blockShape = game.add.graphics(0,0);
 
       // set a fill and line style
@@ -328,15 +433,19 @@ function drawShapes(randInt) {
       blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
       //create the sprite that will be located at x,y
-      shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+      shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
       //add children to the sprite
       shapeSprite.addChild(blockShape)
+      //sprite responds to mouse pointer
+      shapeSprite.inputEnabled = true;
+      shapeSprite.input.enableDrag(false);
+      return shapeSprite
     }
   break;
 
   default:
-    return function largeSquare(randomColor) {
+    return function largeSquare(randomColor, coordinates) {
       let blockShape = game.add.graphics(0,0);
       let blockShape2 = game.add.graphics(0, BLOCKSIZE);
       let blockShape3 = game.add.graphics(0, BLOCKSIZE*2);
@@ -387,7 +496,7 @@ function drawShapes(randInt) {
       blockShape9.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
       //create the sprite that will be located at x,y
-      shapeSprite = game.add.sprite(2*BLOCKSIZE, GAMEDIMENSION+(BLOCKSIZE));
+      shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
       //add children to the sprite
       shapeSprite.addChild(blockShape)
@@ -399,6 +508,10 @@ function drawShapes(randInt) {
       shapeSprite.addChild(blockShape7)
       shapeSprite.addChild(blockShape8)
       shapeSprite.addChild(blockShape9)
+      //sprite responds to mouse pointer
+      shapeSprite.inputEnabled = true;
+      shapeSprite.input.enableDrag(true);
+      return shapeSprite
     }
   break;
   }
@@ -413,7 +526,36 @@ function getRandomInt(max) {
 //selects a random shape
 function blockGenerator() {
   //an array of functions
+  let coordinates = {
+    0: {
+      x: BLOCKSIZE, y: GAMEDIMENSION+(BLOCKSIZE)
+    },
+    1: {
+      x: BLOCKSIZE*6, y: GAMEDIMENSION+(BLOCKSIZE)
+    },
+    2: {
+      x: BLOCKSIZE*4, y: GAMEDIMENSION+(BLOCKSIZE*5)
+    }
+  }
+  for(i=0; i<3; i++) {
+    let closure = drawShapes(getRandomInt(8))
+    //begin block generation
+    let newShape = closure(getRandomShapeColor(), coordinates[i])
+    newShape.inputEnabled = true;
+    newShape.input.enableDrag(true);
+    game.physics.enable(newShape)
+    pendingShapes.add(newShape)
+  }
+}
 
-  let closure = drawShapes(getRandomInt(8))
-  closure(getRandomShapeColor())
+
+//destroy garbage lines
+function lineInspector() {
+  function checkRow() {
+    
+  }
+
+  function checkCol() {
+
+  }
 }
