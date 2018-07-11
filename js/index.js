@@ -551,11 +551,40 @@ function blockGenerator() {
 
 //destroy garbage lines
 function lineInspector() {
-  function checkRow() {
-    
-  }
+  let rowsToDelete = checkRows();
+} 
 
-  function checkCol() {
+function checkBlockOnBoard(coordinates) {
+  let exists = false;
 
+  spriteGroup.children.forEach(sprite => {
+    sprite.children.forEach(block => {
+      if(block.position.x === coordinates.x && block.position.y === coordinates.y) {
+        exists = true;
+      }
+    })
+  })
+  // debugger
+  return exists
+}
+
+function checkRows() {
+  coordinates = {x: 0, y: 0}
+  for (let i = 0; i < GRIDBLOCKSIZE; i++) {
+    let count = 0;
+    for(let u = 0; u < GRIDBLOCKSIZE; u++) {
+      console.log(checkBlockOnBoard(coordinates))
+      //if there exists a block on the game with these particular coordinates
+      if(checkBlockOnBoard(coordinates)) {
+        count++
+      } 
+      coordinates.x += BLOCKSIZE;
+    }
+    if(count === 10) {
+      console.log("full line")
+    }
+    console.log(count)
+    coordinates.x = 0;
+    coordinates.y += BLOCKSIZE;
   }
 }
