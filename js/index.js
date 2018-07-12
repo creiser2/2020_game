@@ -615,7 +615,7 @@ function destroyRowsAndCols(rowsToDelete, colsToDelete) {
 
   //iterate through rows to delete and delete from spriteGroup
   rowsToDelete.forEach(row => {
-    //set the x coordinate to the row
+    //set the y coordinate to the row
     coordinates.y = row*BLOCKSIZE;
     for (let col = 0; col < GRIDBLOCKSIZE; col++) {
       coordinates.x = col*BLOCKSIZE;
@@ -623,18 +623,20 @@ function destroyRowsAndCols(rowsToDelete, colsToDelete) {
     }
   })
 
-  // colsToDelete.forEach(col => {
-  //   //set the x coordinate to the row
-  //   coordinates.y = col*BLOCKSIZE
-  //   for (let row = 0; row < GRIDBLOCKSIZE; row++) {
-  //     coordinates.x = row*BLOCKSIZE
-  //     deleteSpriteAtCoord(coordinates) 
-  //   }
-  // })
+  colsToDelete.forEach(col => {
+    //set the x coordinate to the column
+    coordinates.x = col*BLOCKSIZE;
+    for (let row = 0; row < GRIDBLOCKSIZE; row++) {
+      coordinates.y = row*BLOCKSIZE
+      deleteSpriteAtCoord(coordinates)
+    }
+  })
+
 
 }
 
 function deleteSpriteAtCoord(coordinates) {
+  // This is to delete the rows & columns
   spriteGroup.children.forEach(sprite => {
     sprite.children.forEach(graphic => {
       graphic.worldPosition.x = Math.round(graphic.worldPosition.x/BLOCKSIZE)*BLOCKSIZE;
@@ -645,6 +647,7 @@ function deleteSpriteAtCoord(coordinates) {
       }
     })
   })
+
 }
 
 function blockAbove(coordinates) {
