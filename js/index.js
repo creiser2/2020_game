@@ -24,6 +24,8 @@ let pendingShapes;
 //the currently held down sprite
 let activeSprite;
 let score;
+let spritePositions = [];
+let pendingSpritePositions = [];
 
 //Called first
 function preload() {
@@ -85,9 +87,19 @@ function mouseDragEnd(activeSprite) {
 
         //check to see if the line needs to be destoryed
         lineInspector()
+        // gameOver()
+        
         //if you are out of shapes down in the minibox, generate more
         if(pendingShapes.children.length === 0) {
           blockGenerator();
+        }
+
+        if(pendingShapes.children.length > 0) {
+          let over = gameOver();
+          if(over) {
+            console.log("gameover")
+            game.state.restart()
+          }
         }
       })
     } else {
@@ -573,7 +585,7 @@ function checkRows() {
   for (let i = 0; i < GRIDBLOCKSIZE; i++) {
     let count = 0;
     for(let u = 0; u < GRIDBLOCKSIZE; u++) {
-      console.log(checkBlockOnBoard(coordinates))
+      // console.log(checkBlockOnBoard(coordinates))
       //if there exists a block on the game with these particular coordinates
       if(checkBlockOnBoard(coordinates)) {
         count++
@@ -581,10 +593,79 @@ function checkRows() {
       coordinates.x += BLOCKSIZE;
     }
     if(count === 10) {
-      console.log("full line")
+      // console.log("full line")
     }
-    console.log(count)
+    // console.log(count)
     coordinates.x = 0;
     coordinates.y += BLOCKSIZE;
   }
+}
+
+function gameOver() {
+  spriteCoordinates();
+  pendingSpriteCoordinates();
+  for (let j = 0; j < GRIDBLOCKSIZE; j++) {
+    for (let i = 0; i < GRIDBLOCKSIZE; i++) {
+      let addedX = i*BLOCKSIZE;
+      let addedY = j*BLOCKSIZE;
+      let pseudoPosition = shiftSprite(addedX,addedY); //this 'shifts' the blocks through every possible position on the board
+      maxClashCount = pendingSpritePositions.length;
+      for (let k = 0; k < maxClashCount; k++) {
+        let clashCount = 0;
+        let clashAtPosition = spriteCompare(pseudoPosition[k] )
+        if (!clashAtPosition) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+function spriteCompare(sprite) {
+  let clashTest = false;
+  sprite.forEach(spriteChild => {
+    spritePositions.find(clash => {
+      if (clash.x === spriteChild.x && clash.y === spriteChild.y || spriteChild.x >= GAMEDIMENSION || spriteChild.y >= GAMEDIMENSION) {
+        clashTest = true;
+      }
+    })
+  })
+  return clashTest;
+}
+
+function shiftSprite(addedX,addedY) {
+  let alteredPositionArray = []
+  pendingSpritePositions.forEach(sprite=> {
+    let eachSprite = [];
+    sprite.forEach(child => {
+      eachSprite.push({x:child.x + addedX, y:child.y + addedY})
+    })
+    alteredPositionArray.push(eachSprite)
+  })
+  return alteredPositionArray;
+}
+
+// Generate an array of objects storing x and y coordinates of all places sprites
+function spriteCoordinates() {
+  spritePositions = [];
+  spriteGroup.children.forEach(sprite => {
+    sprite.children.forEach(spriteChild => {
+      let activeX = Math.abs(Math.round(spriteChild.worldPosition.x/BLOCKSIZE)*BLOCKSIZE);
+      let activeY = Math.abs(Math.round(spriteChild.worldPosition.y/BLOCKSIZE)*BLOCKSIZE);
+      spritePositions.push({x:activeX, y: activeY});
+    })
+  })
+}
+
+function pendingSpriteCoordinates() {
+  pendingSpritePositions = [];
+  pendingShapes.forEach(sprite => {
+    let eachSprite = [];
+    let spriteLength = sprite.children.length;
+    sprite.children.forEach(spriteChild => {
+      eachSprite.push({x:spriteChild.position.x, y:spriteChild.position.y});
+    })
+    pendingSpritePositions.push(eachSprite);
+  })
 }
