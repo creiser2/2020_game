@@ -5,18 +5,20 @@
     <title>2020</title>
     <link rel="stylesheet" href="css/style.css">
 
+    <script src="js/game-api.js"></script>
     <script src="js/phaser-v2.10.6-.min.js"></script>
     <script src="js/index.js"> </script>
 </head>
 <body>
-  <div id="left" class="column">
-			<div class="top-left">Welcome: user1234</div>
-			<div class="bottom">
-				<p>High Score: 22</p>
-				<p>Logout</p>
-
-			</div>
-		</div>
+  <div id='app-container'>
+    <div class="top" id='info'>
+      <form id='userForm'>
+        Username:
+        <input type="text" id='userField' placeholder='username'>
+        <button type='submit' id='formSubmit'>Login</button>
+      </form>
+    </div>
     <div id="container"></div>
+  </div>
 </body>
 </html>

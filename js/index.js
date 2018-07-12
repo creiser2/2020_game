@@ -16,6 +16,10 @@ const SHAPECOLORS = {
 //game variavble
 var game = new Phaser.Game(GAMEDIMENSION, WINDOWDIMENSION, Phaser.AUTO, 'container', {preload: preload, create: create, update: update});
 
+//Important DOM elements
+let userField;
+let loginButton;
+
 //Globals
 let shape; //current shape your using
 let spriteGroup; //array of all rendered shapes
@@ -23,19 +27,51 @@ let grid; //grid on board
 let pendingShapes;
 //the currently held down sprite
 let activeSprite;
-let score;
+let score = 0;
 let spritePositions = [];
 let pendingSpritePositions = [];
+let user = {
+  username: "",
+  highScore: "",
+  id: ""
+};
 
 //Called first
 function preload() {
   game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE; //keeps aspect ratio but stretch to fill
   game.scale.pageAlignHorizontally = true; //align game vertically in the window
   game.stage.backgroundColor = '#e2e2e2'; // game background
+  loginButton = document.getElementById('formSubmit')
 }
 
 //Called second
 function create() {
+  let header = document.getElementById("info")
+
+  formSubmit.addEventListener('click', function(event) {
+    event.preventDefault();
+    let username = event.target.parentElement.querySelector("#userField").value
+    getUser(username).then(foundUser=>{
+      user.username = foundUser.username
+      user.highScore = foundUser.high_score
+      user.id = foundUser.id
+      header.innerHTML = ``
+      let userInfo = document.createElement('SPAN')
+      let userHighScore = document.createElement('SPAN')
+      let userCurrentScore = document.createElement('SPAN')
+      userInfo.innerHTML = `username: ${user.username}`
+      userInfo.className = 'info-styling'
+      userHighScore.innerHTML = ` high score: ${user.highScore}`
+      userHighScore.className = 'info-styling'
+      userCurrentScore.innerHTML = ` score: ${score}`
+      userCurrentScore.id = 'score-element'
+      userCurrentScore.className = 'info-styling'
+      header.appendChild(userInfo)
+      header.appendChild(userHighScore)
+      header.appendChild(userCurrentScore)
+    })
+  })
+
   // Enable Box2D physics
   game.physics.startSystem(Phaser.Physics.ARCADE);
   score = 0;
@@ -55,8 +91,8 @@ function create() {
   //current shape choices
   pendingShapes = game.add.group();
 
-  blockGenerator();
 
+  blockGenerator()
   // Set up handlers for mouse events
   game.input.onDown.add(mouseDragStart, this);
   game.input.onUp.add(mouseDragEnd, this);
@@ -98,8 +134,10 @@ function mouseDragEnd(activeSprite) {
         if(pendingShapes.children.length > 0) {
           let over = gameOver();
           if(over) {
-            console.log("gameover")
-            game.state.restart()
+            if(score > user.highScore) {
+              updateScore(user.username, score, user.id)
+            }
+            gameOverMessage()
           }
         }
       })
@@ -644,6 +682,7 @@ function deleteSpriteAtCoord(coordinates) {
       if (graphic.worldPosition.x === coordinates.x && graphic.worldPosition.y === coordinates.y) {
         graphic.destroy()
         score += 1;
+        document.getElementById("score-element").innerHTML = ` score: ${score}`
       }
     })
   })
@@ -670,30 +709,8 @@ function checkBlockOnBoard(coordinates) {
       }
     })
   })
-  // debugger
   return exists
 }
-
-// function checkRows() {
-//   coordinates = {x: 0, y: 0}
-//   for (let i = 0; i < GRIDBLOCKSIZE; i++) {
-//     let count = 0;
-//     for(let u = 0; u < GRIDBLOCKSIZE; u++) {
-//       // console.log(checkBlockOnBoard(coordinates))
-//       //if there exists a block on the game with these particular coordinates
-//       if(checkBlockOnBoard(coordinates)) {
-//         count++
-//       }
-//       coordinates.x += BLOCKSIZE;
-//     }
-//     if(count === 10) {
-//       // console.log("full line")
-//     }
-//     // console.log(count)
-//     coordinates.x = 0;
-//     coordinates.y += BLOCKSIZE;
-//   }
-// }
 
 function gameOver() {
   spriteCoordinates();
@@ -714,6 +731,44 @@ function gameOver() {
     }
   }
   return true;
+}
+
+function gameOverMessage() {
+
+  text = game.add.text(game.world.centerX, game.world.centerY - GAMEDIMENSION/2, "Game Over!");
+
+  //  Centers the text
+  text.anchor.set(0.5);
+  text.align = 'center';
+
+  //  Our font + size
+  text.font = 'Arial';
+  text.fontWeight = 'bold';
+  text.fontSize = 40;
+
+  //  Here we create a linear gradient on the Text context.
+  //  This uses the exact same method of creating a gradient as you do on a normal Canvas context.
+  var grd = text.context.createLinearGradient(0, 0, 0, text.height);
+
+  //  Add in 2 color stops
+  grd.addColorStop(0, '#8ED6FF');
+  grd.addColorStop(1, '#004CB3');
+
+  //  And apply to the Text
+  text.fill = grd;
+
+  // button = game.add.button(game.world.centerX, GAMEDIMENSION - 150, 'button', actionOnClick, this)
+
+  // button.onInputUp.add(end, this);
+
+}
+
+function end() {
+  game.state.restart()
+}
+
+function actionOnClick() {
+
 }
 
 function spriteCompare(sprite) {

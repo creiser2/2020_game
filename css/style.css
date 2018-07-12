@@ -1,46 +1,30 @@
-#banner {
-  height: 30px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  width: 996px;
-  padding: 0px;
-}
+
 
 #container {
   display: block;
-  float: right;
   width: 50%;
   height: 900px;
-}
-
-
-html {
-    height: 100%;
+  clear:both;
 }
 
 body {
     height: 100%;
     overflow: hidden;  /*makes the body non-scrollable (we will add scrolling to the sidebar and main content containers)*/
     margin: 0px;  /*removes default style*/
-    display: flex;  /*enables flex content for its children*/
+    /* display: flex;  /*enables flex content for its children*/ */
     box-sizing: border-box;
 }
 
-.column {
-    height: 100%;  /*allows both columns to span the full height of the browser window*/
-    display: flex;
-    flex-direction: column;  /*places the left and right headers above the bottom content*/
+
+#app-container {
+  width: 400px;
+  margin:auto;
 }
 
-#left {
-    flex-shrink: 0;  /*makes sure that content is not cut off in a smaller browser window*/
+#userForm {
+  display: inline-block;
 }
 
-.top-left {
-    flex-shink: 0;
-}
-
-ul {
-    display: inline-flex;
-    list-style: none;
+.info-styling {
+  color: blue
 }
