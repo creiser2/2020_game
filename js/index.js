@@ -24,6 +24,8 @@ let pendingShapes;
 //the currently held down sprite
 let activeSprite;
 let score;
+let spritePositions = [];
+let pendingSpritePositions = [];
 
 //Called first
 function preload() {
@@ -36,6 +38,7 @@ function preload() {
 function create() {
   // Enable Box2D physics
   game.physics.startSystem(Phaser.Physics.ARCADE);
+  score = 0;
 
   // allow grid to be a group of objects
   grid = game.add.group();
@@ -83,12 +86,22 @@ function mouseDragEnd(activeSprite) {
         activeSprite.inputEnabled = false
         activeSprite.input.disableDrag()
 
+        //check to see if the line needs to be destoryed
+        lineInspector()
+        // gameOver()
+
         //if you are out of shapes down in the minibox, generate more
         if(pendingShapes.children.length === 0) {
           blockGenerator();
         }
-        //check to see if the line needs to be destoryed
-        lineInspector()
+
+        if(pendingShapes.children.length > 0) {
+          let over = gameOver();
+          if(over) {
+            console.log("gameover")
+            game.state.restart()
+          }
+        }
       })
     } else {
       resetSpritePosition(activeSprite)
@@ -551,7 +564,100 @@ function blockGenerator() {
 
 //destroy garbage lines
 function lineInspector() {
+  spriteCoordinates();
   let rowsToDelete = checkRows();
+  let colsToDelete = checkCols();
+  if(rowsToDelete.length > 0 || colsToDelete.length > 0) {
+    destroyRowsAndCols(rowsToDelete, colsToDelete)
+  }
+}
+
+function checkRows() {
+  let rowsToDelete = []
+  coordinates = {x: 0, y: 0}
+  for (let col = 0; col < GRIDBLOCKSIZE; col++) {
+    let count = 0
+    for (let row = 0; row < GRIDBLOCKSIZE; row++) {
+      coordinates.x = BLOCKSIZE*row;
+      coordinates.y = BLOCKSIZE*col;
+      if(blockAbove(coordinates)) {
+        count++
+        if(count === GRIDBLOCKSIZE) {
+          rowsToDelete.push(col)
+        }
+      }
+    }
+  }
+  return rowsToDelete
+}
+
+function checkCols() {
+  let colsToDelete = []
+  coordinates = {x: 0, y: 0}
+  for (let row = 0; row < GRIDBLOCKSIZE; row++) {
+    let count = 0
+    for (let col = 0; col < GRIDBLOCKSIZE; col++) {
+      coordinates.x = BLOCKSIZE*row;
+      coordinates.y = BLOCKSIZE*col;
+      if(blockAbove(coordinates)) {
+        count++
+        if(count === GRIDBLOCKSIZE) {
+          colsToDelete.push(row)
+        }
+      }
+    }
+  }
+  return colsToDelete
+}
+
+function destroyRowsAndCols(rowsToDelete, colsToDelete) {
+  coordinates = {x:0, y:0}
+
+  //iterate through rows to delete and delete from spriteGroup
+  rowsToDelete.forEach(row => {
+    //set the y coordinate to the row
+    coordinates.y = row*BLOCKSIZE;
+    for (let col = 0; col < GRIDBLOCKSIZE; col++) {
+      coordinates.x = col*BLOCKSIZE;
+      deleteSpriteAtCoord(coordinates);
+    }
+  })
+
+  colsToDelete.forEach(col => {
+    //set the x coordinate to the column
+    coordinates.x = col*BLOCKSIZE;
+    for (let row = 0; row < GRIDBLOCKSIZE; row++) {
+      coordinates.y = row*BLOCKSIZE
+      deleteSpriteAtCoord(coordinates)
+    }
+  })
+
+
+}
+
+function deleteSpriteAtCoord(coordinates) {
+  // This is to delete the rows & columns
+  spriteGroup.children.forEach(sprite => {
+    sprite.children.forEach(graphic => {
+      graphic.worldPosition.x = Math.round(graphic.worldPosition.x/BLOCKSIZE)*BLOCKSIZE;
+      graphic.worldPosition.y = Math.round(graphic.worldPosition.y/BLOCKSIZE)*BLOCKSIZE;
+      if (graphic.worldPosition.x === coordinates.x && graphic.worldPosition.y === coordinates.y) {
+        graphic.destroy()
+        score += 1;
+      }
+    })
+  })
+
+}
+
+function blockAbove(coordinates) {
+  let isAbove = false
+  spritePositions.forEach(pos => {
+    if(pos.x === coordinates.x && pos.y === coordinates.y) {
+      isAbove = true
+    }
+  })
+  return isAbove
 }
 
 function checkBlockOnBoard(coordinates) {
@@ -568,37 +674,92 @@ function checkBlockOnBoard(coordinates) {
   return exists
 }
 
-function checkRows() {
-  let count = 0
-  coordinates = {x: 0, y: 0}
-  for(u = 0; u < GRIDBLOCKSIZE; u++){
-    coordinates.x = 0
-    for(i = 0; i < GRIDBLOCKSIZE; i++){
-      if(blockAbove(coordinates)) {
-        count += 1
-        console.log(`there is a block above x: ${coordinates.x} and y: ${coordinates.y} count is now ${count}`)
+// function checkRows() {
+//   coordinates = {x: 0, y: 0}
+//   for (let i = 0; i < GRIDBLOCKSIZE; i++) {
+//     let count = 0;
+//     for(let u = 0; u < GRIDBLOCKSIZE; u++) {
+//       // console.log(checkBlockOnBoard(coordinates))
+//       //if there exists a block on the game with these particular coordinates
+//       if(checkBlockOnBoard(coordinates)) {
+//         count++
+//       }
+//       coordinates.x += BLOCKSIZE;
+//     }
+//     if(count === 10) {
+//       // console.log("full line")
+//     }
+//     // console.log(count)
+//     coordinates.x = 0;
+//     coordinates.y += BLOCKSIZE;
+//   }
+// }
+
+function gameOver() {
+  spriteCoordinates();
+  pendingSpriteCoordinates();
+  for (let j = 0; j < GRIDBLOCKSIZE; j++) {
+    for (let i = 0; i < GRIDBLOCKSIZE; i++) {
+      let addedX = i*BLOCKSIZE;
+      let addedY = j*BLOCKSIZE;
+      let pseudoPosition = shiftSprite(addedX,addedY); //this 'shifts' the blocks through every possible position on the board
+      maxClashCount = pendingSpritePositions.length;
+      for (let k = 0; k < maxClashCount; k++) {
+        let clashCount = 0;
+        let clashAtPosition = spriteCompare(pseudoPosition[k] )
+        if (!clashAtPosition) {
+          return false;
+        }
       }
-      //increment x value to check row
-      coordinates.x += BLOCKSIZE
     }
-    //incremeny y value
-    coordinates.y += BLOCKSIZE
-    //reset the count
-    count = 0
   }
+  return true;
 }
 
-//checks to see if there is a block on a certain coordinate space
-function blockAbove(coordinates) {
-  let isAbove = false;
+function spriteCompare(sprite) {
+  let clashTest = false;
+  sprite.forEach(spriteChild => {
+    spritePositions.find(clash => {
+      if (clash.x === spriteChild.x && clash.y === spriteChild.y || spriteChild.x >= GAMEDIMENSION || spriteChild.y >= GAMEDIMENSION) {
+        clashTest = true;
+      }
+    })
+  })
+  return clashTest;
+}
 
- spriteGroup.children.forEach(sprite => {
-   sprite.children.forEach(block => {
-     if(block.position.x === coordinates.x && block.position.y === coordinates.y) {
-       isAbove = true;
-     }
-   })
- })
- // debugger
- return isAbove
+function shiftSprite(addedX,addedY) {
+  let alteredPositionArray = []
+  pendingSpritePositions.forEach(sprite=> {
+    let eachSprite = [];
+    sprite.forEach(child => {
+      eachSprite.push({x:child.x + addedX, y:child.y + addedY})
+    })
+    alteredPositionArray.push(eachSprite)
+  })
+  return alteredPositionArray;
+}
+
+// Generate an array of objects storing x and y coordinates of all places sprites
+function spriteCoordinates() {
+  spritePositions = [];
+  spriteGroup.children.forEach(sprite => {
+    sprite.children.forEach(spriteChild => {
+      let activeX = Math.abs(Math.round(spriteChild.worldPosition.x/BLOCKSIZE)*BLOCKSIZE);
+      let activeY = Math.abs(Math.round(spriteChild.worldPosition.y/BLOCKSIZE)*BLOCKSIZE);
+      spritePositions.push({x:activeX, y: activeY});
+    })
+  })
+}
+
+function pendingSpriteCoordinates() {
+  pendingSpritePositions = [];
+  pendingShapes.forEach(sprite => {
+    let eachSprite = [];
+    let spriteLength = sprite.children.length;
+    sprite.children.forEach(spriteChild => {
+      eachSprite.push({x:spriteChild.position.x, y:spriteChild.position.y});
+    })
+    pendingSpritePositions.push(eachSprite);
+  })
 }
