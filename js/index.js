@@ -83,12 +83,12 @@ function mouseDragEnd(activeSprite) {
         activeSprite.inputEnabled = false
         activeSprite.input.disableDrag()
 
-        //check to see if the line needs to be destoryed
-        lineInspector()
         //if you are out of shapes down in the minibox, generate more
         if(pendingShapes.children.length === 0) {
           blockGenerator();
         }
+        //check to see if the line needs to be destoryed
+        lineInspector()
       })
     } else {
       resetSpritePosition(activeSprite)
@@ -552,7 +552,7 @@ function blockGenerator() {
 //destroy garbage lines
 function lineInspector() {
   let rowsToDelete = checkRows();
-} 
+}
 
 function checkBlockOnBoard(coordinates) {
   let exists = false;
@@ -569,22 +569,36 @@ function checkBlockOnBoard(coordinates) {
 }
 
 function checkRows() {
+  let count = 0
   coordinates = {x: 0, y: 0}
-  for (let i = 0; i < GRIDBLOCKSIZE; i++) {
-    let count = 0;
-    for(let u = 0; u < GRIDBLOCKSIZE; u++) {
-      console.log(checkBlockOnBoard(coordinates))
-      //if there exists a block on the game with these particular coordinates
-      if(checkBlockOnBoard(coordinates)) {
-        count++
-      } 
-      coordinates.x += BLOCKSIZE;
+  for(u = 0; u < GRIDBLOCKSIZE; u++){
+    coordinates.x = 0
+    for(i = 0; i < GRIDBLOCKSIZE; i++){
+      if(blockAbove(coordinates)) {
+        count += 1
+        console.log(`there is a block above x: ${coordinates.x} and y: ${coordinates.y} count is now ${count}`)
+      }
+      //increment x value to check row
+      coordinates.x += BLOCKSIZE
     }
-    if(count === 10) {
-      console.log("full line")
-    }
-    console.log(count)
-    coordinates.x = 0;
-    coordinates.y += BLOCKSIZE;
+    //incremeny y value
+    coordinates.y += BLOCKSIZE
+    //reset the count
+    count = 0
   }
+}
+
+//checks to see if there is a block on a certain coordinate space
+function blockAbove(coordinates) {
+  let isAbove = false;
+
+ spriteGroup.children.forEach(sprite => {
+   sprite.children.forEach(block => {
+     if(block.position.x === coordinates.x && block.position.y === coordinates.y) {
+       isAbove = true;
+     }
+   })
+ })
+ // debugger
+ return isAbove
 }
