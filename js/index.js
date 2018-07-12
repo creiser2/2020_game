@@ -38,6 +38,7 @@ function preload() {
 function create() {
   // Enable Box2D physics
   game.physics.startSystem(Phaser.Physics.ARCADE);
+  score = 0;
 
   // allow grid to be a group of objects
   grid = game.add.group();
@@ -563,8 +564,98 @@ function blockGenerator() {
 
 //destroy garbage lines
 function lineInspector() {
+  spriteCoordinates();
   let rowsToDelete = checkRows();
+  let colsToDelete = checkCols();
+  if(rowsToDelete.length > 0 || colsToDelete.length > 0) {
+    destroyRowsAndCols(rowsToDelete, colsToDelete)
+  }
 } 
+
+function checkRows() {
+  let rowsToDelete = []
+  coordinates = {x: 0, y: 0}
+  for (let col = 0; col < GRIDBLOCKSIZE; col++) {
+    let count = 0
+    for (let row = 0; row < GRIDBLOCKSIZE; row++) {
+      coordinates.x = BLOCKSIZE*row;
+      coordinates.y = BLOCKSIZE*col;
+      if(blockAbove(coordinates)) {
+        count++
+        if(count === GRIDBLOCKSIZE) {   
+          rowsToDelete.push(col)
+        }
+      }
+    }
+  }
+  return rowsToDelete
+}
+
+function checkCols() {
+  let colsToDelete = []
+  coordinates = {x: 0, y: 0}
+  for (let row = 0; row < GRIDBLOCKSIZE; row++) {
+    let count = 0
+    for (let col = 0; col < GRIDBLOCKSIZE; col++) {
+      coordinates.x = BLOCKSIZE*row;
+      coordinates.y = BLOCKSIZE*col;
+      if(blockAbove(coordinates)) {
+        count++
+        if(count === GRIDBLOCKSIZE) {
+          colsToDelete.push(row)
+        }
+      }
+    }
+  }
+  return colsToDelete
+}
+
+function destroyRowsAndCols(rowsToDelete, colsToDelete) {
+  coordinates = {x:0, y:0}
+
+  //iterate through rows to delete and delete from spriteGroup
+  rowsToDelete.forEach(row => {
+    //set the x coordinate to the row
+    coordinates.y = row*BLOCKSIZE;
+    for (let col = 0; col < GRIDBLOCKSIZE; col++) {
+      coordinates.x = col*BLOCKSIZE;
+      deleteSpriteAtCoord(coordinates);
+    }
+  })
+
+  // colsToDelete.forEach(col => {
+  //   //set the x coordinate to the row
+  //   coordinates.y = col*BLOCKSIZE
+  //   for (let row = 0; row < GRIDBLOCKSIZE; row++) {
+  //     coordinates.x = row*BLOCKSIZE
+  //     deleteSpriteAtCoord(coordinates) 
+  //   }
+  // })
+
+}
+
+function deleteSpriteAtCoord(coordinates) {
+  spriteGroup.children.forEach(sprite => {
+    sprite.children.forEach(graphic => {
+      graphic.worldPosition.x = Math.round(graphic.worldPosition.x/BLOCKSIZE)*BLOCKSIZE;
+      graphic.worldPosition.y = Math.round(graphic.worldPosition.y/BLOCKSIZE)*BLOCKSIZE;
+      if (graphic.worldPosition.x === coordinates.x && graphic.worldPosition.y === coordinates.y) {
+        graphic.destroy()
+        score += 1;
+      }
+    })
+  })
+}
+
+function blockAbove(coordinates) {
+  let isAbove = false
+  spritePositions.forEach(pos => {
+    if(pos.x === coordinates.x && pos.y === coordinates.y) {
+      isAbove = true
+    }
+  })
+  return isAbove
+}
 
 function checkBlockOnBoard(coordinates) {
   let exists = false;
@@ -580,26 +671,26 @@ function checkBlockOnBoard(coordinates) {
   return exists
 }
 
-function checkRows() {
-  coordinates = {x: 0, y: 0}
-  for (let i = 0; i < GRIDBLOCKSIZE; i++) {
-    let count = 0;
-    for(let u = 0; u < GRIDBLOCKSIZE; u++) {
-      // console.log(checkBlockOnBoard(coordinates))
-      //if there exists a block on the game with these particular coordinates
-      if(checkBlockOnBoard(coordinates)) {
-        count++
-      } 
-      coordinates.x += BLOCKSIZE;
-    }
-    if(count === 10) {
-      // console.log("full line")
-    }
-    // console.log(count)
-    coordinates.x = 0;
-    coordinates.y += BLOCKSIZE;
-  }
-}
+// function checkRows() {
+//   coordinates = {x: 0, y: 0}
+//   for (let i = 0; i < GRIDBLOCKSIZE; i++) {
+//     let count = 0;
+//     for(let u = 0; u < GRIDBLOCKSIZE; u++) {
+//       // console.log(checkBlockOnBoard(coordinates))
+//       //if there exists a block on the game with these particular coordinates
+//       if(checkBlockOnBoard(coordinates)) {
+//         count++
+//       } 
+//       coordinates.x += BLOCKSIZE;
+//     }
+//     if(count === 10) {
+//       // console.log("full line")
+//     }
+//     // console.log(count)
+//     coordinates.x = 0;
+//     coordinates.y += BLOCKSIZE;
+//   }
+// }
 
 function gameOver() {
   spriteCoordinates();
