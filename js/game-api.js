@@ -33,7 +33,7 @@ function addUser(newUser) {
     },
     body: JSON.stringify(bodyInfo)
   }
-  return fetch(url, postConfig)
+  return fetch(url, postConfig).then(json => getUser(newUser))
 }
 
 

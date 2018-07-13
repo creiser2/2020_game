@@ -53,20 +53,23 @@ function create() {
     event.preventDefault();
     let username = event.target.parentElement.querySelector("#userField").value
     getUser(username).then(foundUser=>{
+
       user.username = foundUser.username
       user.highScore = foundUser.high_score
       user.id = foundUser.id
       header.innerHTML = ``
       let userInfo = document.createElement('SPAN')
+      userInfo.className = "ui black label info-styling"
       let userHighScore = document.createElement('SPAN')
+      userHighScore.className = "ui black label info-styling"
       let userCurrentScore = document.createElement('SPAN')
-      userInfo.innerHTML = `username: ${user.username}`
-      userInfo.className = 'info-styling'
-      userHighScore.innerHTML = ` high score: ${user.highScore}`
-      userHighScore.className = 'info-styling'
-      userCurrentScore.innerHTML = ` score: ${score}`
+      userCurrentScore.className = "ui black label info-styling"
+      userInfo.innerHTML = `Username: ${user.username}`
+      userHighScore.innerHTML = `High Score: ${user.highScore}`
+
+      userCurrentScore.innerHTML = `Score: ${score}`
       userCurrentScore.id = 'score-element'
-      userCurrentScore.className = 'info-styling'
+
       header.appendChild(userInfo)
       header.appendChild(userHighScore)
       header.appendChild(userCurrentScore)
@@ -674,8 +677,6 @@ function destroyRowsAndCols(rowsToDelete, colsToDelete) {
 
 }
 
-
-
 function deleteSpriteAtCoord(coordinates) {
   // This is to delete the rows & columns
   spriteGroup.children.forEach(sprite => {
@@ -687,9 +688,9 @@ function deleteSpriteAtCoord(coordinates) {
         var tween = game.add.tween(graphic).to( { alpha: 0 }, time, Phaser.Easing.Linear.None, true)
         tween.onComplete.add(function () {
           graphic.destroy();
-          score += 1;
         });
-        document.getElementById("score-element").innerHTML = ` score: ${score}`
+        score += 1;
+        document.getElementById("score-element").innerHTML = `Score: ${score}`
       }
     })
   })
