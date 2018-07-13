@@ -6,6 +6,26 @@ function getUser(username) {
   return fetch(url).then(request => request.json()).then(json => loadUsers(json, username))
 }
 
+function getUsers() {
+  return fetch(url).then(request => request.json()).then(json => displayTopTenUsers(json))
+}
+
+function displayTopTenUsers(json) {
+  json.sort(function(a,b) {
+    var keyA = a.high_score
+    var keyB = b.high_score
+    if(keyA < keyB) {
+      return -1
+    }
+    else if(keyA > keyB) {
+      return 1
+    } else {
+      return 0
+    }
+  }).reverse()
+  return json.slice(0,10)
+}
+
 function loadUsers(json, username) {
   let user = json.find(user => {
     return user.username === username

@@ -33,3 +33,10 @@ body {
 .ui.form .ui.input{
   width: 50% !important;
 }
+
+#top-ten {
+  position: absolute;
+  left: auto;
+  padding-left: 80px;
+  padding-top: 20px;
+}
