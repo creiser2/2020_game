@@ -5,11 +5,12 @@ const GRIDBLOCKSIZE = 10
 const BLOCKSIZE = GAMEDIMENSION/GRIDBLOCKSIZE;
 const SHAPECOLORS = {
   colors: {
-    "red": 0xCC0000,
-    "blue": 0x0000FF,
-    "green": 0x00B300,
-    "pink": 0xFF69B4,
-    "fushia": 0xFF0080
+    "red": 0xf44d41,
+    "blue": 0x478fe8,
+    "green": 0x81dd7e,
+    "purple": 0xce7edd,
+    "yellow": 0xe8e247,
+    "orange": 0xf4a442,
   }
 }
 
@@ -206,7 +207,7 @@ function drawGrid(yGrid) {
     let xGrid = 0;
     for (let x = 0; x < GRIDBLOCKSIZE; x++) {
       let graphics = this.game.add.graphics(); // adds to the world stage
-      graphics.lineStyle(4, 0xffffff, 1);
+      graphics.lineStyle(4, 0xffffff, 0.8);
       graphics.drawRect(xGrid, yGrid-BLOCKSIZE, BLOCKSIZE, BLOCKSIZE);
       grid.add(graphics) // moves from world stage to group as a child
       xGrid += BLOCKSIZE;
@@ -249,19 +250,19 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         blockShape4.beginFill(randomColor);
-        blockShape4.lineStyle(2, 0xffffff, 0.5);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
 
         blockShape5.beginFill(randomColor);
-        blockShape5.lineStyle(2, 0xffffff, 0.5);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -294,13 +295,13 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -331,19 +332,19 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         blockShape4.beginFill(randomColor);
-        blockShape4.lineStyle(2, 0xffffff, 0.5);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
 
         blockShape5.beginFill(randomColor);
-        blockShape5.lineStyle(2, 0xffffff, 0.5);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -375,16 +376,16 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         blockShape4.beginFill(randomColor);
-        blockShape4.lineStyle(2, 0xffffff, 0.5);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -413,13 +414,13 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -447,13 +448,13 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -478,7 +479,7 @@ function drawShapes(randInt) {
 
       // set a fill and line style
       blockShape.beginFill(randomColor);
-      blockShape.lineStyle(2, 0xffffff, 0.5);
+      blockShape.lineStyle(4, 0xffffff, 0.8);
 
       //draw rectangles
       blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -509,31 +510,31 @@ function drawShapes(randInt) {
 
       // set a fill and line style
       blockShape.beginFill(randomColor);
-      blockShape.lineStyle(2, 0xffffff, 0.5);
+      blockShape.lineStyle(4, 0xffffff, 0.8);
 
       blockShape2.beginFill(randomColor);
-      blockShape2.lineStyle(2, 0xffffff, 0.5);
+      blockShape2.lineStyle(4, 0xffffff, 0.8);
 
       blockShape3.beginFill(randomColor);
-      blockShape3.lineStyle(2, 0xffffff, 0.5);
+      blockShape3.lineStyle(4, 0xffffff, 0.8);
 
       blockShape4.beginFill(randomColor);
-      blockShape4.lineStyle(2, 0xffffff, 0.5);
+      blockShape4.lineStyle(4, 0xffffff, 0.8);
 
       blockShape5.beginFill(randomColor);
-      blockShape5.lineStyle(2, 0xffffff, 0.5);
+      blockShape5.lineStyle(4, 0xffffff, 0.8);
 
       blockShape6.beginFill(randomColor);
-      blockShape6.lineStyle(2, 0xffffff, 0.5);
+      blockShape6.lineStyle(4, 0xffffff, 0.8);
 
       blockShape7.beginFill(randomColor);
-      blockShape7.lineStyle(2, 0xffffff, 0.5);
+      blockShape7.lineStyle(4, 0xffffff, 0.8);
 
       blockShape8.beginFill(randomColor);
-      blockShape8.lineStyle(2, 0xffffff, 0.5);
+      blockShape8.lineStyle(4, 0xffffff, 0.8);
 
       blockShape9.beginFill(randomColor);
-      blockShape9.lineStyle(2, 0xffffff, 0.5);
+      blockShape9.lineStyle(4, 0xffffff, 0.8);
 
       //draw rectangles
       blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
