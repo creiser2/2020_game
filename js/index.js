@@ -5,13 +5,17 @@ const GRIDBLOCKSIZE = 10
 const BLOCKSIZE = GAMEDIMENSION/GRIDBLOCKSIZE;
 const SHAPECOLORS = {
   colors: {
-    "red": 0xCC0000,
-    "blue": 0x0000FF,
-    "green": 0x00B300,
-    "pink": 0xFF69B4,
-    "fushia": 0xFF0080
+    "red": 0xf44d41,
+    "blue": 0x478fe8,
+    "green": 0x81dd7e,
+    "purple": 0xce7edd,
+    "yellow": 0xe8e247,
+    "orange": 0xf4a442,
+    "teal": 0x42f4d4,
+    "black": 0x000000
   }
 }
+const SHAPENUMBER = 15
 
 //game variavble
 var game = new Phaser.Game(GAMEDIMENSION, WINDOWDIMENSION, Phaser.AUTO, 'container', {preload: preload, create: create, update: update});
@@ -30,6 +34,7 @@ let activeSprite;
 let score = 0;
 let spritePositions = [];
 let pendingSpritePositions = [];
+let topTenUsers;
 let user = {
   username: "",
   highScore: "",
@@ -47,25 +52,40 @@ function preload() {
 //Called second
 function create() {
   let header = document.getElementById("info")
+  topTenUsers = getUsers().then(users => {
+    let topTenHolder = document.getElementById('top-ten')
+    let head = document.createElement("h2")
+    head.innerHTML = "Top Ten"
+    topTenHolder.appendChild(head)
+    let ul = document.createElement("UL")
+    ul.className = "ui inverted segment"
+    topTenHolder.appendChild(ul)
+    users.forEach(user => {
+      ul.innerHTML += `<div class="item">${user.username} | ${user.high_score}</div>`
+    })
+  })
 
   formSubmit.addEventListener('click', function(event) {
     event.preventDefault();
     let username = event.target.parentElement.querySelector("#userField").value
     getUser(username).then(foundUser=>{
+
       user.username = foundUser.username
       user.highScore = foundUser.high_score
       user.id = foundUser.id
       header.innerHTML = ``
       let userInfo = document.createElement('SPAN')
+      userInfo.className = "ui black label info-styling"
       let userHighScore = document.createElement('SPAN')
+      userHighScore.className = "ui black label info-styling"
       let userCurrentScore = document.createElement('SPAN')
-      userInfo.innerHTML = `username: ${user.username}`
-      userInfo.className = 'info-styling'
-      userHighScore.innerHTML = ` high score: ${user.highScore}`
-      userHighScore.className = 'info-styling'
-      userCurrentScore.innerHTML = ` score: ${score}`
+      userCurrentScore.className = "ui black label info-styling"
+      userInfo.innerHTML = `Username: ${user.username}`
+      userHighScore.innerHTML = `High Score: ${user.highScore}`
+
+      userCurrentScore.innerHTML = `Score: ${score}`
       userCurrentScore.id = 'score-element'
-      userCurrentScore.className = 'info-styling'
+
       header.appendChild(userInfo)
       header.appendChild(userHighScore)
       header.appendChild(userCurrentScore)
@@ -183,6 +203,7 @@ function selectedSprite(pendingShapes) {
   return selectedChild
 }
 
+
 function selectedSpriteInBounds(activeSprite) {
   let inBounds = true
   activeSprite.children.forEach(child=>{
@@ -205,7 +226,7 @@ function drawGrid(yGrid) {
     let xGrid = 0;
     for (let x = 0; x < GRIDBLOCKSIZE; x++) {
       let graphics = this.game.add.graphics(); // adds to the world stage
-      graphics.lineStyle(4, 0xffffff, 1);
+      graphics.lineStyle(4, 0xffffff, 0.8);
       graphics.drawRect(xGrid, yGrid-BLOCKSIZE, BLOCKSIZE, BLOCKSIZE);
       grid.add(graphics) // moves from world stage to group as a child
       xGrid += BLOCKSIZE;
@@ -214,8 +235,7 @@ function drawGrid(yGrid) {
   }
 }
 
-
-//pick a random element from SHAPECOLORS
+//pick a ranom element from SHAPECOLORS
 function getRandomShapeColor() {
   let result;
   let count = 0;
@@ -232,7 +252,7 @@ function getRandomShapeColor() {
 // //drawshape function invokes other functions based on random integers
 function drawShapes(randInt) {
 
-  //8 distinct shape function closures
+  //11 distinct shape function closures
   switch(randInt) {
 
     //five vertical squares
@@ -247,19 +267,19 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         blockShape4.beginFill(randomColor);
-        blockShape4.lineStyle(2, 0xffffff, 0.5);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
 
         blockShape5.beginFill(randomColor);
-        blockShape5.lineStyle(2, 0xffffff, 0.5);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -292,13 +312,48 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        shapeSprite.addChild(blockShape3)
+
+        return shapeSprite
+      }
+    break;
+
+    //three horiz squares
+    case 2:
+      //draw the three adjacent squares shape
+      return function threeAdjacentSquares(randomColor, coordinates) {
+        let blockShape = this.game.add.graphics(0,0);
+        let blockShape2 = this.game.add.graphics(0, BLOCKSIZE);
+        let blockShape3 = this.game.add.graphics(0, BLOCKSIZE*2);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape3.beginFill(randomColor);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -318,7 +373,7 @@ function drawShapes(randInt) {
     break;
 
     // 7 shape
-    case 2:
+    case 3:
       //draw mirrorred L shape
       return function lShapeMirrored(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
@@ -329,19 +384,19 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         blockShape4.beginFill(randomColor);
-        blockShape4.lineStyle(2, 0xffffff, 0.5);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
 
         blockShape5.beginFill(randomColor);
-        blockShape5.lineStyle(2, 0xffffff, 0.5);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -363,8 +418,8 @@ function drawShapes(randInt) {
         return shapeSprite
       }
 
-    //generate square shape
-    case 3:
+    //generate four square
+    case 4:
       return function squareShape(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(BLOCKSIZE, 0);
@@ -373,16 +428,16 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         blockShape4.beginFill(randomColor);
-        blockShape4.lineStyle(2, 0xffffff, 0.5);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -403,7 +458,7 @@ function drawShapes(randInt) {
       }
 
     //generate small mirrored L
-    case 4:
+    case 5:
       return function lShapeSmallMirrored(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(BLOCKSIZE, 0);
@@ -411,13 +466,13 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -437,7 +492,7 @@ function drawShapes(randInt) {
     break;
 
     //generate small L
-    case 5:
+    case 6:
       return function lShapeSmall(randomColor, coordinates) {
         let blockShape = game.add.graphics(0,0);
         let blockShape2 = game.add.graphics(0, BLOCKSIZE);
@@ -445,13 +500,13 @@ function drawShapes(randInt) {
 
         // set a fill and line style
         blockShape.beginFill(randomColor);
-        blockShape.lineStyle(2, 0xffffff, 0.5);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
         blockShape2.beginFill(randomColor);
-        blockShape2.lineStyle(2, 0xffffff, 0.5);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
 
         blockShape3.beginFill(randomColor);
-        blockShape3.lineStyle(2, 0xffffff, 0.5);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
 
         //draw rectangles
         blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
@@ -468,105 +523,368 @@ function drawShapes(randInt) {
 
         return shapeSprite
       }
-  break;
+    break;
 
-  case 6:
-    return function singleSquare(randomColor, coordinates) {
-      let blockShape = game.add.graphics(0,0);
+    //single square
+    case 7:
+      return function singleSquare(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
 
-      // set a fill and line style
-      blockShape.beginFill(randomColor);
-      blockShape.lineStyle(2, 0xffffff, 0.5);
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
 
-      //draw rectangles
-      blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
 
-      //create the sprite that will be located at x,y
-      shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
 
-      //add children to the sprite
-      shapeSprite.addChild(blockShape)
-      //sprite responds to mouse pointer
-      shapeSprite.inputEnabled = true;
-      shapeSprite.input.enableDrag(false);
-      return shapeSprite
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        //sprite responds to mouse pointer
+        shapeSprite.inputEnabled = true;
+        shapeSprite.input.enableDrag(false);
+        return shapeSprite
+      }
+    break;
+
+    //four horizontal squares
+    case 8:
+      return function fourHorizontalSquares(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
+        let blockShape2 = game.add.graphics(BLOCKSIZE,0);
+        let blockShape3 = game.add.graphics(BLOCKSIZE*2,0);
+        let blockShape4 = game.add.graphics(BLOCKSIZE*3,0);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape3.beginFill(randomColor);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape4.beginFill(randomColor);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        shapeSprite.addChild(blockShape3)
+        shapeSprite.addChild(blockShape4)
+        //sprite responds to mouse pointer
+        shapeSprite.inputEnabled = true;
+        shapeSprite.input.enableDrag(false);
+        return shapeSprite
+      }
+    break;
+
+    //five horizontal squares
+    case 9:
+      return function fiveHorizontalSquares(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
+        let blockShape2 = game.add.graphics(BLOCKSIZE,0);
+        let blockShape3 = game.add.graphics(BLOCKSIZE*2,0);
+        let blockShape4 = game.add.graphics(BLOCKSIZE*3,0);
+        let blockShape5 = game.add.graphics(BLOCKSIZE*4,0);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape3.beginFill(randomColor);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape4.beginFill(randomColor);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape5.beginFill(randomColor);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        shapeSprite.addChild(blockShape3)
+        shapeSprite.addChild(blockShape4)
+        shapeSprite.addChild(blockShape5)
+
+        //sprite responds to mouse pointer
+        shapeSprite.inputEnabled = true;
+        shapeSprite.input.enableDrag(false);
+        return shapeSprite
+      }
+    break;
+
+    //two verical squares
+    case 10:
+      return function twoVerticalSquares(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
+        let blockShape2 = game.add.graphics(0,BLOCKSIZE);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        //sprite responds to mouse pointer
+        shapeSprite.inputEnabled = true;
+        shapeSprite.input.enableDrag(false);
+        return shapeSprite
+      }
+    break;
+
+    //big L shape
+    case 11:
+      return function bigLShape(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
+        let blockShape2 = game.add.graphics(0, BLOCKSIZE);
+        let blockShape3 = game.add.graphics(0, 2*BLOCKSIZE);
+        let blockShape4 = game.add.graphics(BLOCKSIZE, 2*BLOCKSIZE);
+        let blockShape5 = game.add.graphics(BLOCKSIZE*2, 2*BLOCKSIZE);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape3.beginFill(randomColor);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape4.beginFill(randomColor);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape5.beginFill(randomColor);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        shapeSprite.addChild(blockShape3)
+        shapeSprite.addChild(blockShape4)
+        shapeSprite.addChild(blockShape5)
+
+        return shapeSprite
+      }
+    break;
+
+    //Backwards big L
+    case 12:
+      return function bigLShape(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
+        let blockShape2 = game.add.graphics(0, BLOCKSIZE);
+        let blockShape3 = game.add.graphics(0, 2*BLOCKSIZE);
+        let blockShape4 = game.add.graphics(-BLOCKSIZE, 2*BLOCKSIZE);
+        let blockShape5 = game.add.graphics(-BLOCKSIZE*2, 2*BLOCKSIZE);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape3.beginFill(randomColor);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape4.beginFill(randomColor);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape5.beginFill(randomColor);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        shapeSprite.addChild(blockShape3)
+        shapeSprite.addChild(blockShape4)
+        shapeSprite.addChild(blockShape5)
+
+        return shapeSprite
+      }
+    break;
+
+    //Backwards mirrored big L
+    case 13:
+      return function bigLShape(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
+        let blockShape2 = game.add.graphics(0, BLOCKSIZE);
+        let blockShape3 = game.add.graphics(0, 2*BLOCKSIZE);
+        let blockShape4 = game.add.graphics(BLOCKSIZE, 0);
+        let blockShape5 = game.add.graphics(BLOCKSIZE*2, 0);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape3.beginFill(randomColor);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape4.beginFill(randomColor);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape5.beginFill(randomColor);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        shapeSprite.addChild(blockShape3)
+        shapeSprite.addChild(blockShape4)
+        shapeSprite.addChild(blockShape5)
+
+        return shapeSprite
+      }
+    break;
+
+
+    //nine square block
+    default:
+      return function largeSquare(randomColor, coordinates) {
+        let blockShape = game.add.graphics(0,0);
+        let blockShape2 = game.add.graphics(0, BLOCKSIZE);
+        let blockShape3 = game.add.graphics(0, BLOCKSIZE*2);
+        let blockShape4 = game.add.graphics(BLOCKSIZE, BLOCKSIZE*2);
+        let blockShape5 = game.add.graphics(BLOCKSIZE*2, BLOCKSIZE*2);
+        let blockShape6 = game.add.graphics(BLOCKSIZE, BLOCKSIZE);
+        let blockShape7 = game.add.graphics(BLOCKSIZE*2, BLOCKSIZE);
+        let blockShape8 = game.add.graphics(BLOCKSIZE*2, 0);
+        let blockShape9 = game.add.graphics(BLOCKSIZE, 0);
+
+        // set a fill and line style
+        blockShape.beginFill(randomColor);
+        blockShape.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape2.beginFill(randomColor);
+        blockShape2.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape3.beginFill(randomColor);
+        blockShape3.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape4.beginFill(randomColor);
+        blockShape4.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape5.beginFill(randomColor);
+        blockShape5.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape6.beginFill(randomColor);
+        blockShape6.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape7.beginFill(randomColor);
+        blockShape7.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape8.beginFill(randomColor);
+        blockShape8.lineStyle(4, 0xffffff, 0.8);
+
+        blockShape9.beginFill(randomColor);
+        blockShape9.lineStyle(4, 0xffffff, 0.8);
+
+        //draw rectangles
+        blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape6.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape7.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape8.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+        blockShape9.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
+
+        //create the sprite that will be located at x,y
+        shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
+
+        //add children to the sprite
+        shapeSprite.addChild(blockShape)
+        shapeSprite.addChild(blockShape2)
+        shapeSprite.addChild(blockShape3)
+        shapeSprite.addChild(blockShape4)
+        shapeSprite.addChild(blockShape5)
+        shapeSprite.addChild(blockShape6)
+        shapeSprite.addChild(blockShape7)
+        shapeSprite.addChild(blockShape8)
+        shapeSprite.addChild(blockShape9)
+        //sprite responds to mouse pointer
+        shapeSprite.inputEnabled = true;
+        shapeSprite.input.enableDrag(true);
+        return shapeSprite
+      }
+    break;
     }
-  break;
-
-  default:
-    return function largeSquare(randomColor, coordinates) {
-      let blockShape = game.add.graphics(0,0);
-      let blockShape2 = game.add.graphics(0, BLOCKSIZE);
-      let blockShape3 = game.add.graphics(0, BLOCKSIZE*2);
-      let blockShape4 = game.add.graphics(BLOCKSIZE, BLOCKSIZE*2);
-      let blockShape5 = game.add.graphics(BLOCKSIZE*2, BLOCKSIZE*2);
-      let blockShape6 = game.add.graphics(BLOCKSIZE, BLOCKSIZE);
-      let blockShape7 = game.add.graphics(BLOCKSIZE*2, BLOCKSIZE);
-      let blockShape8 = game.add.graphics(BLOCKSIZE*2, 0);
-      let blockShape9 = game.add.graphics(BLOCKSIZE, 0);
-
-      // set a fill and line style
-      blockShape.beginFill(randomColor);
-      blockShape.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape2.beginFill(randomColor);
-      blockShape2.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape3.beginFill(randomColor);
-      blockShape3.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape4.beginFill(randomColor);
-      blockShape4.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape5.beginFill(randomColor);
-      blockShape5.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape6.beginFill(randomColor);
-      blockShape6.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape7.beginFill(randomColor);
-      blockShape7.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape8.beginFill(randomColor);
-      blockShape8.lineStyle(2, 0xffffff, 0.5);
-
-      blockShape9.beginFill(randomColor);
-      blockShape9.lineStyle(2, 0xffffff, 0.5);
-
-      //draw rectangles
-      blockShape.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape2.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape3.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape4.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape5.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape6.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape7.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape8.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-      blockShape9.drawRect(0, 0, BLOCKSIZE, BLOCKSIZE);
-
-      //create the sprite that will be located at x,y
-      shapeSprite = game.add.sprite(coordinates.x, coordinates.y);
-
-      //add children to the sprite
-      shapeSprite.addChild(blockShape)
-      shapeSprite.addChild(blockShape2)
-      shapeSprite.addChild(blockShape3)
-      shapeSprite.addChild(blockShape4)
-      shapeSprite.addChild(blockShape5)
-      shapeSprite.addChild(blockShape6)
-      shapeSprite.addChild(blockShape7)
-      shapeSprite.addChild(blockShape8)
-      shapeSprite.addChild(blockShape9)
-      //sprite responds to mouse pointer
-      shapeSprite.inputEnabled = true;
-      shapeSprite.input.enableDrag(true);
-      return shapeSprite
-    }
-  break;
-  }
 }
 
-//random int generation between 1 and 6
+
+//random int generation between 1 and 9
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
@@ -582,11 +900,11 @@ function blockGenerator() {
       x: BLOCKSIZE*6, y: GAMEDIMENSION+(BLOCKSIZE)
     },
     2: {
-      x: BLOCKSIZE*4, y: GAMEDIMENSION+(BLOCKSIZE*5)
+      x: BLOCKSIZE*4, y: GAMEDIMENSION+(BLOCKSIZE*6)
     }
   }
   for(i=0; i<3; i++) {
-    let closure = drawShapes(getRandomInt(8))
+    let closure = drawShapes(getRandomInt(SHAPENUMBER))
     //begin block generation
     let newShape = closure(getRandomShapeColor(), coordinates[i])
     newShape.inputEnabled = true;
@@ -606,7 +924,6 @@ function lineInspector() {
   }
 }
 
-//check to see if any rows need to be deleted
 function checkRows() {
   let rowsToDelete = []
   coordinates = {x: 0, y: 0}
@@ -626,7 +943,6 @@ function checkRows() {
   return rowsToDelete
 }
 
-//check to see if any columns need to be deleted
 function checkCols() {
   let colsToDelete = []
   coordinates = {x: 0, y: 0}
@@ -646,7 +962,6 @@ function checkCols() {
   return colsToDelete
 }
 
-//destroy rows and colums based on row number and column number
 function destroyRowsAndCols(rowsToDelete, colsToDelete) {
   coordinates = {x:0, y:0}
 
@@ -672,7 +987,6 @@ function destroyRowsAndCols(rowsToDelete, colsToDelete) {
 
 }
 
-//delete a particular sprite's graphic at a certain coordinate set
 function deleteSpriteAtCoord(coordinates) {
   // This is to delete the rows & columns
   spriteGroup.children.forEach(sprite => {
@@ -680,16 +994,18 @@ function deleteSpriteAtCoord(coordinates) {
       graphic.worldPosition.x = Math.round(graphic.worldPosition.x/BLOCKSIZE)*BLOCKSIZE;
       graphic.worldPosition.y = Math.round(graphic.worldPosition.y/BLOCKSIZE)*BLOCKSIZE;
       if (graphic.worldPosition.x === coordinates.x && graphic.worldPosition.y === coordinates.y) {
-        graphic.destroy()
+        let time = 300 //ms
+        var tween = game.add.tween(graphic).to( { alpha: 0 }, time, Phaser.Easing.Linear.None, true)
+        tween.onComplete.add(function () {
+          graphic.destroy();
+        });
         score += 1;
-        document.getElementById("score-element").innerHTML = ` score: ${score}`
+        document.getElementById("score-element").innerHTML = `Score: ${score}`
       }
     })
   })
-
 }
 
-//check to see if there is a block at a certain coordinate set
 function blockAbove(coordinates) {
   let isAbove = false
   spritePositions.forEach(pos => {
@@ -700,7 +1016,6 @@ function blockAbove(coordinates) {
   return isAbove
 }
 
-//check to see if there is a block at a certain coordinate set
 function checkBlockOnBoard(coordinates) {
   let exists = false;
 
@@ -714,7 +1029,6 @@ function checkBlockOnBoard(coordinates) {
   return exists
 }
 
-//check to see if the game is over
 function gameOver() {
   spriteCoordinates();
   pendingSpriteCoordinates();
@@ -736,7 +1050,6 @@ function gameOver() {
   return true;
 }
 
-//set the gameover message on main screen
 function gameOverMessage() {
 
   text = game.add.text(game.world.centerX, game.world.centerY - GAMEDIMENSION/2, "Game Over!");
@@ -760,7 +1073,10 @@ function gameOverMessage() {
 
   //  And apply to the Text
   text.fill = grd;
-  // setTimeout(function(){  }, 3000);
+
+  // button = game.add.button(game.world.centerX, GAMEDIMENSION - 150, 'button', actionOnClick, this)
+
+  // button.onInputUp.add(end, this);
 
 }
 
@@ -784,7 +1100,6 @@ function spriteCompare(sprite) {
   return clashTest;
 }
 
-//shift sprite down to (special for gameOver function)
 function shiftSprite(addedX,addedY) {
   let alteredPositionArray = []
   pendingSpritePositions.forEach(sprite=> {
@@ -809,7 +1124,6 @@ function spriteCoordinates() {
   })
 }
 
-//coordinates of blocks that have not been placed yet
 function pendingSpriteCoordinates() {
   pendingSpritePositions = [];
   pendingShapes.forEach(sprite => {

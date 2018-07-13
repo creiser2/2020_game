@@ -18,13 +18,25 @@ body {
 
 #app-container {
   width: 400px;
-  margin:auto;
+  margin: auto;
 }
 
 #userForm {
   display: inline-block;
 }
 
-.info-styling {
-  color: blue
+.ui.black.label {
+  margin-right: 3%;
+  margin-bottom: 10px;
+}
+
+.ui.form .ui.input{
+  width: 50% !important;
+}
+
+#top-ten {
+  position: absolute;
+  left: auto;
+  padding-left: 80px;
+  padding-top: 20px;
 }
