@@ -1,4 +1,4 @@
-const url = "http://localhost:3000/api/v1/users"
+const url = "https://tentenbackend.herokuapp.com/api/v1/users"
 
 
 // fetch games
