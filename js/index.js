@@ -183,7 +183,6 @@ function selectedSprite(pendingShapes) {
   return selectedChild
 }
 
-
 function selectedSpriteInBounds(activeSprite) {
   let inBounds = true
   activeSprite.children.forEach(child=>{
@@ -216,8 +215,7 @@ function drawGrid(yGrid) {
 }
 
 
-
-//pick a ranom element from SHAPECOLORS
+//pick a random element from SHAPECOLORS
 function getRandomShapeColor() {
   let result;
   let count = 0;
@@ -568,7 +566,6 @@ function drawShapes(randInt) {
   }
 }
 
-
 //random int generation between 1 and 6
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
@@ -599,7 +596,6 @@ function blockGenerator() {
   }
 }
 
-
 //destroy garbage lines
 function lineInspector() {
   spriteCoordinates();
@@ -610,6 +606,7 @@ function lineInspector() {
   }
 }
 
+//check to see if any rows need to be deleted
 function checkRows() {
   let rowsToDelete = []
   coordinates = {x: 0, y: 0}
@@ -629,6 +626,7 @@ function checkRows() {
   return rowsToDelete
 }
 
+//check to see if any columns need to be deleted
 function checkCols() {
   let colsToDelete = []
   coordinates = {x: 0, y: 0}
@@ -648,6 +646,7 @@ function checkCols() {
   return colsToDelete
 }
 
+//destroy rows and colums based on row number and column number
 function destroyRowsAndCols(rowsToDelete, colsToDelete) {
   coordinates = {x:0, y:0}
 
@@ -673,6 +672,7 @@ function destroyRowsAndCols(rowsToDelete, colsToDelete) {
 
 }
 
+//delete a particular sprite's graphic at a certain coordinate set
 function deleteSpriteAtCoord(coordinates) {
   // This is to delete the rows & columns
   spriteGroup.children.forEach(sprite => {
@@ -689,6 +689,7 @@ function deleteSpriteAtCoord(coordinates) {
 
 }
 
+//check to see if there is a block at a certain coordinate set
 function blockAbove(coordinates) {
   let isAbove = false
   spritePositions.forEach(pos => {
@@ -699,6 +700,7 @@ function blockAbove(coordinates) {
   return isAbove
 }
 
+//check to see if there is a block at a certain coordinate set
 function checkBlockOnBoard(coordinates) {
   let exists = false;
 
@@ -712,6 +714,7 @@ function checkBlockOnBoard(coordinates) {
   return exists
 }
 
+//check to see if the game is over
 function gameOver() {
   spriteCoordinates();
   pendingSpriteCoordinates();
@@ -733,6 +736,7 @@ function gameOver() {
   return true;
 }
 
+//set the gameover message on main screen
 function gameOverMessage() {
 
   text = game.add.text(game.world.centerX, game.world.centerY - GAMEDIMENSION/2, "Game Over!");
@@ -756,10 +760,7 @@ function gameOverMessage() {
 
   //  And apply to the Text
   text.fill = grd;
-
-  // button = game.add.button(game.world.centerX, GAMEDIMENSION - 150, 'button', actionOnClick, this)
-
-  // button.onInputUp.add(end, this);
+  // setTimeout(function(){  }, 3000);
 
 }
 
@@ -783,6 +784,7 @@ function spriteCompare(sprite) {
   return clashTest;
 }
 
+//shift sprite down to (special for gameOver function)
 function shiftSprite(addedX,addedY) {
   let alteredPositionArray = []
   pendingSpritePositions.forEach(sprite=> {
@@ -807,6 +809,7 @@ function spriteCoordinates() {
   })
 }
 
+//coordinates of blocks that have not been placed yet
 function pendingSpriteCoordinates() {
   pendingSpritePositions = [];
   pendingShapes.forEach(sprite => {
