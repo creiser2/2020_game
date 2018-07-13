@@ -674,7 +674,7 @@ function destroyRowsAndCols(rowsToDelete, colsToDelete) {
 
 }
 
-   
+
 
 function deleteSpriteAtCoord(coordinates) {
   // This is to delete the rows & columns
@@ -684,12 +684,12 @@ function deleteSpriteAtCoord(coordinates) {
       graphic.worldPosition.y = Math.round(graphic.worldPosition.y/BLOCKSIZE)*BLOCKSIZE;
       if (graphic.worldPosition.x === coordinates.x && graphic.worldPosition.y === coordinates.y) {
         let time = 300 //ms
-        var tween = game.add.tween(graphic).to( { alpha: 0 }, time, Phaser.Easing.Linear.None, true)   
-        tween.onComplete.add(function () {        
-          graphic.destroy();    
+        var tween = game.add.tween(graphic).to( { alpha: 0 }, time, Phaser.Easing.Linear.None, true)
+        tween.onComplete.add(function () {
+          graphic.destroy();
           score += 1;
-        }); 
-        // document.getElementById("score-element").innerHTML = ` score: ${score}`
+        });
+        document.getElementById("score-element").innerHTML = ` score: ${score}`
       }
     })
   })
